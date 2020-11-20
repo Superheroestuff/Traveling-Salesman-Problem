@@ -45,11 +45,35 @@ public:
 };
 
 vector<Town> allTowns;
-
-
+int N;//number of towns
+void init() {
+	cout << "Enter number of towns: ";
+	cin >> N;
+	int x, y, NorP;
+	for (int i = 0; i < N; i++) {
+		Town newTown;
+		x = rand() % 100;
+		NorP = rand() % 2;
+		if (NorP % 2 == 1) {
+			x = -1 * x;
+		}
+		NorP = rand() % 2;
+		y = rand() % 100;
+		if (NorP % 2 == 1) {
+			y = -1 * y;
+		}
+		newTown.setX(x);
+		newTown.setY(y);
+		allTowns.push_back(newTown);
+	}
+}
 int main()
 {
-    std::cout << "Hello World!\n"; 
+	init();
+	for (int i = 0; i < N; i++) {
+		allTowns[i].printTown();
+		cout << endl;
+	}
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
