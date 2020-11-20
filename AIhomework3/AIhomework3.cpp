@@ -4,9 +4,13 @@
 #include "pch.h"
 #include <iostream>
 #include<vector>
+#include<cmath>
+#include<time.h>
+#include<algorithm>
 using namespace std;
 
-
+int N;//number of towns
+int populationSize;
 
 struct Town {
 private:
@@ -31,8 +35,20 @@ public:
 		return this->y;
 	}
 
+	void operator=(const Town& t) {
+		this->x = t.x;
+		this->y = t.y;
+	}
+
 	bool operator==(const Town& t) {
 		if (t.x == this->x && t.y == this->y) {
+			return true;
+		}
+		else return false;
+	}
+
+	bool operator!=(const Town& t) {
+		if (t.x != this->x || t.y != this->y) {
 			return true;
 		}
 		else return false;
@@ -44,11 +60,106 @@ public:
 
 };
 
+
+int calculateDistance(Town &first, Town&second) {
+	return sqrt(pow((first.getX()-second.getX()),2)+ pow((first.getY() - second.getY()), 2));
+}
+
 vector<Town> allTowns;
-int N;//number of towns
+
+
+//one Chromosome is one configuration of the Towns
+struct Chromosome {
+private:
+	vector<Town> arrTowns;//arrangement of Towns
+	int fitness;
+
+public:
+
+	vector<Town> getArrTowns(){
+		return this->arrTowns;
+	}
+
+	int getFitness(){
+		return this->fitness;
+	}
+
+	Chromosome(vector<Town> towns) {
+		arrTowns = towns;
+		calculateFitness();	
+	}
+
+	bool operator==(const Chromosome& ch) {
+		for (int i = 0; i < N; i++){
+			if (this->arrTowns[i] != ch.arrTowns[i]) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	void calculateFitness() {
+		this->fitness = 0;
+		for (int i = 1; i < N; i++) {
+			this->fitness += calculateDistance(arrTowns[i], arrTowns[i - 1]);
+		}
+		this->fitness += calculateDistance(arrTowns[arrTowns.size() - 1], arrTowns[0]);//distance between last and first Town
+	}
+
+	void printChromosome() {
+		for (int i = 0; i < N; i++) {
+			this->arrTowns[i].printTown();
+		}
+	}
+};
+
+vector<Chromosome> population;
+
+void initPopulation() {
+	for (int i = 0; i < populationSize; i++) {
+		vector<Town> randChromosome = allTowns;
+		random_shuffle(randChromosome.begin(), randChromosome.end());
+		if (find(population.begin(), population.end(), randChromosome) == population.end()) {//if we do not have this chromosome in the population => we add it
+			population.push_back(randChromosome);
+		}
+		else {//if this chromosome is already in the population, we go one step back, because we need to get population with size = populationsize
+			i--;
+		}
+	}
+}
+
+void printPopulation() {
+	for (int i = 0; i < populationSize; i++) {
+		population[i].printChromosome();
+		cout << endl;
+	}
+}
+
 void init() {
 	cout << "Enter number of towns: ";
 	cin >> N;
+	bool flag=0;
+	char answer;
+	
+	cout << "Do you want to set population size? (If not, it will be default size 10000)" << endl;
+	while (flag == 0) {
+		cin >> answer;
+		if (answer == 'y') {
+			cout << "Enter size of population: ";
+			cin >> populationSize;
+			flag = 1;
+		}
+		else if (answer == 'n') {
+			populationSize = 10000;
+			flag = 1;
+		}
+		else {
+			cout << "You must write y or n" << endl;
+			flag = 0;
+		}
+	}
+	
+	//populationSize = 10000;
 	int x, y, NorP;
 	for (int i = 0; i < N; i++) {
 		Town newTown;
@@ -66,14 +177,14 @@ void init() {
 		newTown.setY(y);
 		allTowns.push_back(newTown);
 	}
+	initPopulation();
+	//printPopulation();
 }
 int main()
 {
+	srand(time(NULL));
 	init();
-	for (int i = 0; i < N; i++) {
-		allTowns[i].printTown();
-		cout << endl;
-	}
+
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
