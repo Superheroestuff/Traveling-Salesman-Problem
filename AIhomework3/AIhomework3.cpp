@@ -1,7 +1,3 @@
-// AIhomework3.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
-#include "pch.h"
 #include <iostream>
 #include<vector>
 #include<cmath>
@@ -35,19 +31,15 @@ public:
 		return this->y;
 	}
 
-	void operator=(const Town& t) {
-		this->x = t.x;
-		this->y = t.y;
-	}
 
 	bool operator==(const Town& t) {
 		if (t.x == this->x && t.y == this->y) {
 			return true;
 		}
-		else return false;
+		return false;
 	}
 
-	bool operator!=(const Town& t) {
+	bool operator!=(const Town& t) const{
 		if (t.x != this->x || t.y != this->y) {
 			return true;
 		}
@@ -57,13 +49,13 @@ public:
 	void printTown() {
 		cout << "X: " << this->x << " Y: " << this->y << endl;
 	}
-
+	int calculateDistance(Town&t) {
+		return sqrt(pow(x-t.x, 2) + pow(y-t.y, 2));
+	}
 };
 
 
-int calculateDistance(Town &first, Town&second) {
-	return sqrt(pow((first.getX()-second.getX()),2)+ pow((first.getY() - second.getY()), 2));
-}
+
 
 vector<Town> allTowns;
 
@@ -72,7 +64,7 @@ vector<Town> allTowns;
 struct Chromosome {
 private:
 	vector<Town> arrTowns;//arrangement of Towns
-	int fitness;
+	double fitness;
 
 public:
 
@@ -80,16 +72,23 @@ public:
 		return this->arrTowns;
 	}
 
-	int getFitness(){
+	double getFitness(){
 		return this->fitness;
 	}
 
-	Chromosome(vector<Town> towns) {
+	Chromosome(vector<Town> &towns) {
 		arrTowns = towns;
-		calculateFitness();	
+		calculateFitness();
 	}
 
-	bool operator==(const Chromosome& ch) {
+	bool hasTown(Town &t){
+        for(int i = 0; i<N; i++){
+            if(arrTowns[i]==t) return true;
+        }
+        return false;
+	}
+
+	bool operator==(const Chromosome& ch) const{
 		for (int i = 0; i < N; i++){
 			if (this->arrTowns[i] != ch.arrTowns[i]) {
 				return false;
@@ -98,49 +97,157 @@ public:
 		return true;
 	}
 
+	bool operator<(const Chromosome& ch) {
+		return this->fitness < ch.fitness;
+	}
+
 	void calculateFitness() {
 		this->fitness = 0;
 		for (int i = 1; i < N; i++) {
-			this->fitness += calculateDistance(arrTowns[i], arrTowns[i - 1]);
+			this->fitness += arrTowns[i].calculateDistance( arrTowns[i - 1]);
 		}
-		this->fitness += calculateDistance(arrTowns[arrTowns.size() - 1], arrTowns[0]);//distance between last and first Town
+		this->fitness += arrTowns[arrTowns.size() - 1].calculateDistance( arrTowns[0]);//distance between last and first Town
 	}
 
 	void printChromosome() {
 		for (int i = 0; i < N; i++) {
 			this->arrTowns[i].printTown();
 		}
+		cout<<"Fitness:" << this->fitness<<endl;
 	}
 };
 
-vector<Chromosome> population;
-
-void initPopulation() {
-	for (int i = 0; i < populationSize; i++) {
-		vector<Town> randChromosome = allTowns;
-		random_shuffle(randChromosome.begin(), randChromosome.end());
-		if (find(population.begin(), population.end(), randChromosome) == population.end()) {//if we do not have this chromosome in the population => we add it
-			population.push_back(randChromosome);
-		}
-		else {//if this chromosome is already in the population, we go one step back, because we need to get population with size = populationsize
-			i--;
-		}
-	}
+bool hasVectorMember(vector<Town> &towns, Town &t){
+    for(int i = 0 ; i< towns.size(); i++){
+        if(towns[i] == t) return true;
+    }
+    return false;
 }
 
-void printPopulation() {
-	for (int i = 0; i < populationSize; i++) {
-		population[i].printChromosome();
-		cout << endl;
-	}
-}
+struct Population {
+private:
+	vector<Chromosome> population;
+	int currPopulationSize = 0;
 
-void init() {
+public:
+
+    int getCurrPopulationSize(){
+        return currPopulationSize;
+    }
+
+	bool addChromosome(Chromosome &ch) {
+		if (hasChromosome(ch) && currPopulationSize > 0) {
+			return false;
+		}
+		population.push_back(ch);
+		currPopulationSize++;
+		return true;
+	}
+	bool hasChromosome(Chromosome &ch) {
+		for (int i = 0; i < currPopulationSize; i++) {
+			if (population[i] == ch) return true;
+		}
+		return false;
+	}
+
+	void initPopulation() {
+		for (int i = 0; i < populationSize; i++) {
+			vector<Town> randChromosome = allTowns;
+			random_shuffle(randChromosome.begin(), randChromosome.end());
+			Chromosome newChromosome(randChromosome);
+			if (!addChromosome(newChromosome)) {
+				i--;
+				continue;
+			}
+		}
+	}
+
+	void removeWeakChromosomes(){
+        for(int i = 0; i< populationSize/2; i++){
+            population.pop_back();
+        }
+        currPopulationSize = population.size();
+	}
+
+
+
+	void crossover(){
+        int firstParentIdx = rand()%currPopulationSize;
+        int secondParentIdx ;
+        do{
+            secondParentIdx = rand()%currPopulationSize;
+        }while(firstParentIdx == secondParentIdx);
+
+        vector<Town> firstChromosome = population[firstParentIdx].getArrTowns();
+        vector<Town> secondChromosome = population[secondParentIdx].getArrTowns();
+
+        int randTownIdx = rand()%N;
+
+
+        vector<Town> firstChild(firstChromosome.begin(),firstChromosome.begin()+randTownIdx);
+        vector<Town> secondChild(secondChromosome.begin(),secondChromosome.begin()+randTownIdx);
+
+
+        for(int i = 0; i<N; i++){
+            if(!hasVectorMember(firstChild,secondChromosome[i])){
+                firstChild.push_back(secondChromosome[i]);
+            }
+        }
+
+        for(int i = 0; i<N; i++){
+            if(!hasVectorMember(secondChild,firstChromosome[i])){
+                secondChild.push_back(firstChromosome[i]);
+            }
+        }
+
+
+        cout<<"INDEX:  "<<randTownIdx<<endl;
+        cout<<"First Parent: "<<endl;
+        for(int i = 0; i<N; i++){
+            firstChromosome[i].printTown();
+        }
+        cout<<"Second Parent: "<<endl;
+        for(int i = 0; i<N; i++){
+            secondChromosome[i].printTown();
+        }
+        cout<<"First Child:  "<<endl;
+        for(int i = 0; i<firstChild.size();i++){
+            firstChild[i].printTown();
+        }
+       cout<<endl;
+
+        cout<<"Second Child:  "<<endl;
+        for(int i = 0; i<secondChild.size();i++){
+            secondChild[i].printTown();
+        }
+       cout<<endl;
+
+
+       //CONSTRUCTED THE CHILD, NOW WE SHOULD ADD THEM TO THE NEW POPULATION
+
+    }
+	void printPopulation() {
+		for (int i = 0; i < populationSize; i++) {
+			population[i].printChromosome();
+			cout << endl;
+		}
+	}
+    void sortPopulation() {// sort chromosomes in population in asc order by their fitness
+        sort(population.begin(),population.end());
+    }
+
+    void printBestChromosome(){
+        population[0].printChromosome();
+    }
+
+};
+
+void initTowns() {
 	cout << "Enter number of towns: ";
 	cin >> N;
 	bool flag=0;
 	char answer;
-	
+
 	cout << "Do you want to set population size? (If not, it will be default size 10000)" << endl;
 	while (flag == 0) {
 		cin >> answer;
@@ -158,7 +265,7 @@ void init() {
 			flag = 0;
 		}
 	}
-	
+
 	//populationSize = 10000;
 	int x, y, NorP;
 	for (int i = 0; i < N; i++) {
@@ -177,23 +284,37 @@ void init() {
 		newTown.setY(y);
 		allTowns.push_back(newTown);
 	}
-	initPopulation();
 	//printPopulation();
+}
+
+void GeneticAlgorithm(Population &population, int n){//n->number of current iteration
+    if(n<0){
+        return;
+    }
+    cout<<population.getCurrPopulationSize()<<endl;
+    population.sortPopulation();
+    population.printBestChromosome();
+    cout<<endl;
+    population.removeWeakChromosomes();
+    population.crossover();
+    /*TODO::
+    1.remove weak chromosomes->50%population -> check
+    2.crossover the strong chromosome for the new generation
+    3.mutate chromosomes
+    */
+
+    //GeneticAlgorithm(population,n-1);
+}
+
+void solve(){
+    initTowns();
+    Population population;
+    population.initPopulation();
+    GeneticAlgorithm(population, 20);
 }
 int main()
 {
 	srand(time(NULL));
-	init();
+	solve();
 
 }
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file

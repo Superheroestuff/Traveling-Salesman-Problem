@@ -1,4 +1,0 @@
-﻿  AIhomework3.cpp
-c:\users\diana\documents\github\aihomework3\aihomework3\aihomework3.cpp(65): warning C4244: 'return': conversion from 'double' to 'int', possible loss of data
-c:\users\diana\documents\github\aihomework3\aihomework3\aihomework3.cpp(185): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
-  AIhomework3.vcxproj -> C:\Users\Diana\Documents\GitHub\AIhomework3\Debug\AIhomework3.exe
