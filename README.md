@@ -7,13 +7,14 @@ The project solves TSP problem using Genetic Algorithm.
 (Explanation of GA -> https://en.wikipedia.org/wiki/Genetic_algorithm)
 
 Helping notes:
-  -the Towns are represented as points in 2D coord. system;
-  -Chromosome is a set of all Towns;
-  -Population is a set of Chromosomes;
-  -every Chromosome has a fitness - the total distance between the towns (considering the arrangement; distance between last and first town included);
-  -the iteration in this algorithm are fixed (30);
-  -the size of the population is fixed (5000);
-
+<ul>
+  <li>the Towns are represented as points in 2D coord. system;</li>
+  <li>Chromosome is a set of all Towns;</li>
+  <li>Population is a set of Chromosomes;</li>
+  <li>every Chromosome has a fitness - the total distance between the towns (considering the arrangement; distance between last and first town included);</li>
+  <li>the iteration in this algorithm are fixed (30);</li>
+  <li>the size of the population is fixed (5000);</li>
+</ul>
 The Genetic Algorithm is used as it follows:
  1. The input is the number of towns;
  2. Generates the towns represented as points;
