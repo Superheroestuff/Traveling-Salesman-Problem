@@ -16,13 +16,17 @@ Helping notes:
   <li>the size of the population is fixed (5000);</li>
 </ul>
 The Genetic Algorithm is used as it follows:
- 1. The input is the number of towns;
- 2. Generates the towns represented as points;
- 3. Generate the first population;
- 4. Sorts the population by their fitness;
- 5. Takes the first halp of the population, and trows away the second half a.k.a. the Weak Chromosomes;
- 6. Start Crossover process (terminates when the population size is restored):
-    -takes two chromosomes of the population that make two children;
-    -adds the children to the population;
- 7. If there are more iterations left -> go to step 4;
+<ol>
+<li> The input is the number of towns;</li>
+ <li> Generates the towns represented as points;</li>
+ <li> Generate the first population;</li>
+ <li> Sorts the population by their fitness;</li>
+ <li> Takes the first halp of the population, and trows away the second half a.k.a. the Weak Chromosomes;</li>
+ <li> Start Crossover process (terminates when the population size is restored):</li>
+ <ul>
+    <li> takes two chromosomes of the population that make two children;</li>
+    <li> adds the children to the population;</li>
+    </ul>
+ <li> If there are more iterations left -> go to step 4;</li>
+ </ol>
  
