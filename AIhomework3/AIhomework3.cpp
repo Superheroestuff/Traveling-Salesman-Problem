@@ -109,6 +109,20 @@ public:
 		this->fitness += arrTowns[arrTowns.size() - 1].calculateDistance( arrTowns[0]);//distance between last and first Town
 	}
 
+	void mutate(){
+        int randFactor = rand()%100;
+        if(randFactor<=10){
+            int firstIdx = rand()%arrTowns.size();
+            int secondIdx;
+            do{
+                secondIdx = rand()%arrTowns.size();
+            }while(firstIdx==secondIdx);
+
+            swap(arrTowns[firstIdx],arrTowns[secondIdx]);
+            calculateFitness();
+        }
+	}
+
 	void printChromosome() {
 		for (int i = 0; i < N; i++) {
 			this->arrTowns[i].printTown();
@@ -200,28 +214,6 @@ public:
             }
         }
 
-
-        /*cout<<"INDEX:  "<<randTownIdx<<endl;
-        cout<<"First Parent: "<<endl;
-        for(int i = 0; i<N; i++){
-            firstChromosome[i].printTown();
-        }
-        cout<<"Second Parent: "<<endl;
-        for(int i = 0; i<N; i++){
-            secondChromosome[i].printTown();
-        }
-        cout<<"First Child:  "<<endl;
-        for(int i = 0; i<firstChild.size();i++){
-            firstChild[i].printTown();
-        }
-       cout<<endl;
-
-        cout<<"Second Child:  "<<endl;
-        for(int i = 0; i<secondChild.size();i++){
-            secondChild[i].printTown();
-        }
-       cout<<endl;
-       */
        Chromosome child1(firstChild);
        Chromosome child2(secondChild);
 
@@ -236,6 +228,12 @@ public:
 
        //CONSTRUCTED THE CHILD, NOW WE SHOULD ADD THEM TO THE NEW POPULATION
 
+    }
+
+    void mutation(){
+        for(int i = 0; i<populationSize; i++){
+            population[i].mutate();
+        }
     }
 	void printPopulation() {
 		for (int i = 0; i < populationSize; i++) {
@@ -312,6 +310,8 @@ void GeneticAlgorithm(Population &population, int n){//n->number of current iter
     while(population.getCurrPopulationSize()<populationSize){
         population.crossover();
     }
+
+    population.mutation();
     /*TODO::
     1.remove weak chromosomes->50%population -> check
     2.crossover the strong chromosome for the new generation
