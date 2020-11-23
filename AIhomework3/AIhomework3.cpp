@@ -201,7 +201,7 @@ public:
         }
 
 
-        cout<<"INDEX:  "<<randTownIdx<<endl;
+        /*cout<<"INDEX:  "<<randTownIdx<<endl;
         cout<<"First Parent: "<<endl;
         for(int i = 0; i<N; i++){
             firstChromosome[i].printTown();
@@ -221,6 +221,17 @@ public:
             secondChild[i].printTown();
         }
        cout<<endl;
+       */
+       Chromosome child1(firstChild);
+       Chromosome child2(secondChild);
+
+       if((currPopulationSize+1) != populationSize){
+            addChromosome(child1);
+            addChromosome(child2);
+       }
+       else if(currPopulationSize<populationSize){
+            addChromosome(child1);
+       }
 
 
        //CONSTRUCTED THE CHILD, NOW WE SHOULD ADD THEM TO THE NEW POPULATION
@@ -287,7 +298,7 @@ void initTowns() {
 	//printPopulation();
 }
 
-void GeneticAlgorithm(Population &population, int n){//n->number of current iteration
+void GeneticAlgorithm(Population &population, int n){//n->number of current iteration/generations)
     if(n<0){
         return;
     }
@@ -295,22 +306,26 @@ void GeneticAlgorithm(Population &population, int n){//n->number of current iter
     population.sortPopulation();
     population.printBestChromosome();
     cout<<endl;
+
     population.removeWeakChromosomes();
-    population.crossover();
+
+    while(population.getCurrPopulationSize()<populationSize){
+        population.crossover();
+    }
     /*TODO::
     1.remove weak chromosomes->50%population -> check
     2.crossover the strong chromosome for the new generation
     3.mutate chromosomes
     */
 
-    //GeneticAlgorithm(population,n-1);
+    GeneticAlgorithm(population,n-1);
 }
 
 void solve(){
     initTowns();
     Population population;
     population.initPopulation();
-    GeneticAlgorithm(population, 20);
+    GeneticAlgorithm(population, 30);
 }
 int main()
 {
